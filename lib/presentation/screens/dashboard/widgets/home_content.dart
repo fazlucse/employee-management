@@ -114,29 +114,80 @@ class HomeContent extends StatelessWidget {
 );
   }
 
-  Widget _buildQuickActions(BuildContext context) {
-    final actions = [
-      {'label': 'Clock In/Out', 'onTap': () {}},
-      {'label': 'Apply Leave', 'onTap': () {}},
-      {'label': 'Movement Register', 'onTap': () {}},
-      {
-        'label': 'View Tasks',
-        'onTap': () => context.read<DashboardCubit>().changeScreen('tasks'),
-      },
-    ];
+Widget _buildQuickActions(BuildContext context) {
+  final actions = [
+    {
+      'label': 'Clock In/Out',
+      'icon': LucideIcons.clock,
+      'onTap': () {},
+    },
+    {
+      'label': 'Apply Leave',
+      'icon': LucideIcons.calendar,
+      'onTap': () {},
+    },
+    {
+      'label': 'Movement Register',
+      'icon': LucideIcons.mapPin,
+      'onTap': () {},
+    },
+    {
+      'label': 'View Tasks',
+      'icon': LucideIcons.checkSquare,
+      'onTap': () => context.read<DashboardCubit>().changeScreen('tasks'),
+    },
+  ];
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      children: actions
-          .map((action) => QuickActionCard(
-                label: action['label'] as String,
-                onTap: action['onTap'] as VoidCallback,
-              ))
-          .toList(),
-    );
-  }
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final screenWidth = constraints.maxWidth;
+      final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
 
+      int crossAxisCount;
+      double childAspectRatio;
+      double spacing;
+
+      if (screenWidth >= 1200) {
+        crossAxisCount = 6;
+        childAspectRatio = 1.8;
+        spacing = 12;
+      } else if (screenWidth >= 900) {
+        crossAxisCount = 4;
+        childAspectRatio = 1.9;
+        spacing = 10;
+      } else if (screenWidth >= 600) {
+        crossAxisCount = isPortrait ? 2 : 4;
+        childAspectRatio = isPortrait ? 1.7 : 2.1;
+        spacing = 10;
+      } else {
+        crossAxisCount = 2;
+        childAspectRatio = 1.7; // Safe for small screens
+        spacing = 8;
+      }
+
+      return GridView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: spacing),
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: crossAxisCount,
+          crossAxisSpacing: spacing,
+          mainAxisSpacing: spacing,
+          childAspectRatio: childAspectRatio,
+        ),
+        itemCount: actions.length,
+        itemBuilder: (context, index) {
+          final action = actions[index];
+          return QuickActionCard(
+            label: action['label'] as String,
+            icon: action['icon'] as IconData,
+            onTap: action['onTap'] as VoidCallback,
+          );
+        },
+      );
+    },
+  );
+}
   Widget _buildRecentActivity(BuildContext context) {
     return Card(
       child: ListTile(

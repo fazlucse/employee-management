@@ -1,3 +1,4 @@
+import 'package:employee_management/presentation/screens/dashboard/widgets/more_menu_bottom_sheet.dart';
 import 'package:employee_management/presentation/screens/reports/reports_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +18,7 @@ import '../settings/settings_screen.dart';
 import '../profile/profile_screen.dart';
 import 'widgets/bottom_nav_item.dart';
 import 'widgets/home_content.dart';
+import 'widgets/more_menu_bottom_sheet.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -62,36 +64,25 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMoreMenu() {
-    return BlocBuilder<DashboardCubit, DashboardState>(
-      builder: (context, state) {
-        if (!state.showMoreMenu) return const SizedBox();
-        return GestureDetector(
-          onTap: () => context.read<DashboardCubit>().closeMoreMenu(),
-          child: Center(
-            child: Container(
-              width: ScreenUtil.w(280),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 12)]),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _moreItem('Tasks', AppIcons.checkCircle, 'tasks', context),
-                  _moreItem('Statistics', AppIcons.barChart, 'stats', context),
-                  _moreItem('Notifications', AppIcons.bell, 'notifications', context),
-                  _moreItem('Team', AppIcons.users, 'team', context),
-                  _moreItem('Projects', AppIcons.briefcase, 'projects', context),
-                  _moreItem('Payroll', AppIcons.dollarSign, 'payroll', context),
-                  _moreItem('Achievements', AppIcons.award, 'achievements', context),
-                  _moreItem('Settings', AppIcons.settings, 'settings', context),
-                ],
-              ),
-            ),
+ Widget _buildMoreMenu() {
+  return BlocBuilder<DashboardCubit, DashboardState>(
+    builder: (context, state) {
+      if (!state.showMoreMenu) return const SizedBox();
+      Future.microtask(() {
+        showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => MoreMenuBottomSheet(
+            cubit: context.read<DashboardCubit>(), // Pass cubit here
           ),
-        );
-      },
-    );
-  }
+        ).then((_) => context.read<DashboardCubit>().closeMoreMenu());
+      });
+
+      return const SizedBox();
+    },
+  );
+}
 
   Widget _moreItem(String label, IconData icon, String screen, BuildContext ctx) {
     return ListTile(
