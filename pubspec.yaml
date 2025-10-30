@@ -19,6 +19,8 @@ dependencies:
   lucide_icons: ^0.257.0
   shared_preferences: ^2.5.3
   geolocator: ^14.0.2
+  cloud_firestore: ^6.0.3
+  firebase_auth: ^6.1.1
 
 dev_dependencies:
   flutter_test:
