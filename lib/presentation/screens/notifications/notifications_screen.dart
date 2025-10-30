@@ -1,7 +1,7 @@
 // presentation/screens/notifications/notifications_screen.dart
+import 'package:employee_management/presentation/cubits/notifications/notifications_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../cubits/notifications/notifications_cubit.dart';
 import 'widgets/notification_tile.dart';
 
 class NotificationsScreen extends StatelessWidget {

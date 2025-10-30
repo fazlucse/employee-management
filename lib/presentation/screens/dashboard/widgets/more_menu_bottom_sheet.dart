@@ -42,15 +42,15 @@ class MoreMenuBottomSheet extends StatelessWidget {
               child: Row(
                 children: [
                   // Handle Bar (Left-aligned under title)
-                  Container(
-                    width: 40,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).dividerColor,
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                  const Spacer(),
+                  // Container(
+                  //   width: 40,
+                  //   height: 5,
+                  //   decoration: BoxDecoration(
+                  //     color: Theme.of(context).dividerColor,
+                  //     borderRadius: BorderRadius.circular(3),
+                  //   ),
+                  // ),
+                  // const Spacer(),
 
                   // Centered Title
                   Expanded(

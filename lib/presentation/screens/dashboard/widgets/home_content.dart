@@ -1,4 +1,5 @@
 // presentation/screens/dashboard/widgets/home_content.dart
+import 'package:employee_management/presentation/cubits/attendance/attendance_cubit.dart';
 import 'package:employee_management/presentation/screens/dashboard/widgets/quick_action_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,26 +17,32 @@ class HomeContent extends StatelessWidget {
     ScreenUtil.init(context);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(15),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Header
-          _buildHeader(context),
-          const SizedBox(height: 20),
+          // _buildHeader(context),
+          // const SizedBox(height: 20),
 
           // Stats Row
           _buildStatsRow(context),
           const SizedBox(height: 24),
 
           // Quick Actions
-          const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Quick Actions',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           _buildQuickActions(context),
           const SizedBox(height: 24),
 
           // Recent Activity
-          const Text('Recent Activity', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            'Recent Activity',
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 12),
           _buildRecentActivity(context),
         ],
@@ -49,7 +56,10 @@ class HomeContent extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Text('Dashboard', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            const Text(
+              'Dashboard',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
             const Spacer(),
             Stack(
               children: [
@@ -71,127 +81,153 @@ class HomeContent extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 8),
-        const Text('Welcome Back!', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+        const Text(
+          'Welcome Back!',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+        ),
         Text(
           'John Doe - Software Developer',
-          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color),
+          style: TextStyle(
+            color: Theme.of(context).textTheme.bodyMedium?.color,
+          ),
         ),
         Text(
           'Monday, October 28, 2025',
-          style: TextStyle(color: Theme.of(context).textTheme.bodyMedium?.color?.withOpacity(0.7), fontSize: 13),
+          style: TextStyle(
+            color: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.color?.withOpacity(0.7),
+            fontSize: 13,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildStatsRow(BuildContext context) {
-    return Row(
-  children: const [
-    Expanded(
-      child: StatCard(
-        value: '22',
-        title: 'Total Hours',
-        color: Colors.blue,
-      ),
-    ),
-    SizedBox(width: 12),
-    Expanded(
-      child: StatCard(
-        value: '3',
-        title: 'Hours Today',
-        color: Colors.green,
-      ),
-    ),
-    SizedBox(width: 12),
-    Expanded(
-      child: StatCard(
-        value: '7',
-        title: 'Pending Tasks',
-        color: Colors.orange,
-      ),
-    ),
-  ],
-);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: const [
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                value: '10:01 AM',
+                title: 'Arrived Today',
+                color: Colors.blueAccent,
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: StatCard(
+                value: '4 Late',
+                title: 'Late / Early',
+                color: Colors.orangeAccent,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 12),
+
+        // Second row
+        Row(
+          children: [
+            Expanded(
+              child: StatCard(
+                value: '2',
+                title: 'On Leave',
+                color: Colors.redAccent,
+              ),
+            ),
+            SizedBox(width: 12),
+            Expanded(
+              child: StatCard(
+                value: '8h 45m',
+                title: 'Work Time',
+                color: Colors.green,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
   }
 
-Widget _buildQuickActions(BuildContext context) {
-  final actions = [
-    {
-      'label': 'Clock In/Out',
-      'icon': LucideIcons.clock,
-      'onTap': () {},
-    },
-    {
-      'label': 'Apply Leave',
-      'icon': LucideIcons.calendar,
-      'onTap': () {},
-    },
-    {
-      'label': 'Movement Register',
-      'icon': LucideIcons.mapPin,
-      'onTap': () {},
-    },
-    {
-      'label': 'View Tasks',
-      'icon': LucideIcons.checkSquare,
-      'onTap': () => context.read<DashboardCubit>().changeScreen('tasks'),
-    },
-  ];
+  Widget _buildQuickActions(BuildContext context) {
+    final actions = [
+      {'label': 'Clock In/Out', 'icon': LucideIcons.clock, 'onTap':  () => context.read<DashboardCubit>().changeScreen('attendance')},
+      {'label': 'Apply Leave', 'icon': LucideIcons.calendar, 'onTap': () {}},
+      {
+        'label': 'Movement Register',
+        'icon': LucideIcons.mapPin,
+        'onTap': () {},
+      },
+      {
+        'label': 'View Tasks',
+        'icon': LucideIcons.checkSquare,
+        'onTap': () => context.read<DashboardCubit>().changeScreen('tasks'),
+      },
+    ];
 
-  return LayoutBuilder(
-    builder: (context, constraints) {
-      final screenWidth = constraints.maxWidth;
-      final isPortrait = MediaQuery.of(context).orientation == Orientation.portrait;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final screenWidth = constraints.maxWidth;
+        final isPortrait =
+            MediaQuery.of(context).orientation == Orientation.portrait;
 
-      int crossAxisCount;
-      double childAspectRatio;
-      double spacing;
+        int crossAxisCount;
+        double childAspectRatio;
+        double spacing;
 
-      if (screenWidth >= 1200) {
-        crossAxisCount = 6;
-        childAspectRatio = 1.8;
-        spacing = 12;
-      } else if (screenWidth >= 900) {
-        crossAxisCount = 4;
-        childAspectRatio = 1.9;
-        spacing = 10;
-      } else if (screenWidth >= 600) {
-        crossAxisCount = isPortrait ? 2 : 4;
-        childAspectRatio = isPortrait ? 1.7 : 2.1;
-        spacing = 10;
-      } else {
-        crossAxisCount = 2;
-        childAspectRatio = 1.7; // Safe for small screens
-        spacing = 8;
-      }
+        if (screenWidth >= 1200) {
+          crossAxisCount = 6;
+          childAspectRatio = 1.8;
+          spacing = 12;
+        } else if (screenWidth >= 900) {
+          crossAxisCount = 4;
+          childAspectRatio = 1.9;
+          spacing = 10;
+        } else if (screenWidth >= 600) {
+          crossAxisCount = isPortrait ? 2 : 4;
+          childAspectRatio = isPortrait ? 1.7 : 2.1;
+          spacing = 10;
+        } else {
+          crossAxisCount = 2;
+          childAspectRatio = 1.7; // Safe for small screens
+          spacing = 8;
+        }
 
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.symmetric(horizontal: spacing),
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: crossAxisCount,
-          crossAxisSpacing: spacing,
-          mainAxisSpacing: spacing,
-          childAspectRatio: childAspectRatio,
-        ),
-        itemCount: actions.length,
-        itemBuilder: (context, index) {
-          final action = actions[index];
-          return QuickActionCard(
-            label: action['label'] as String,
-            icon: action['icon'] as IconData,
-            onTap: action['onTap'] as VoidCallback,
-          );
-        },
-      );
-    },
-  );
-}
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          // padding: EdgeInsets.symmetric(horizontal: spacing),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: spacing,
+            mainAxisSpacing: spacing,
+            childAspectRatio: childAspectRatio,
+          ),
+          itemCount: actions.length,
+          itemBuilder: (context, index) {
+            final action = actions[index];
+            return QuickActionCard(
+              label: action['label'] as String,
+              icon: action['icon'] as IconData,
+              onTap: action['onTap'] as VoidCallback,
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildRecentActivity(BuildContext context) {
     return Card(
       child: ListTile(
-        leading: Icon(LucideIcons.clock, color: Theme.of(context).colorScheme.primary),
+        leading: Icon(
+          LucideIcons.clock,
+          color: Theme.of(context).colorScheme.primary,
+        ),
         title: const Text('Clocked in at 9:00 AM'),
         subtitle: const Text('Today'),
         trailing: const Icon(LucideIcons.chevronRight),

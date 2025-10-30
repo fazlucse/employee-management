@@ -1,3 +1,4 @@
+import 'package:employee_management/presentation/screens/attendance/attendance_screen.dart';
 import 'package:employee_management/presentation/screens/dashboard/widgets/more_menu_bottom_sheet.dart';
 import 'package:employee_management/presentation/screens/reports/reports_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import '../../../core/constants/app_icons.dart';
 import '../../../core/utils/screen_util.dart';
 import '../../cubits/navigation/navigation_cubit.dart';
 import '../../cubits/dashboard/dashboard_cubit.dart';
+import '../../cubits/notifications/notifications_cubit.dart';
 import '../tasks/tasks_screen.dart';
 import '../stats/stats_screen.dart';
 import '../notifications/notifications_screen.dart';
@@ -16,9 +18,9 @@ import '../projects/projects_screen.dart';
 import '../payroll/payroll_screen.dart';
 import '../settings/settings_screen.dart';
 import '../profile/profile_screen.dart';
+import 'widgets/app_bar.dart';
 import 'widgets/bottom_nav_item.dart';
 import 'widgets/home_content.dart';
-import 'widgets/more_menu_bottom_sheet.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -26,9 +28,14 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(context);
-    return BlocProvider(
-      create: (_) => DashboardCubit(),
+    return MultiBlocProvider(
+     providers: [
+      BlocProvider(create: (_) => DashboardCubit()),
+      BlocProvider(create: (_) => NotificationsCubit()), // ADD THIS LINE
+      // BlocProvider(create: (_) => NavigationCubit()), // If needed
+    ],
       child: Scaffold(
+        // appBar: DashboardAppBar(),
         body: SafeArea(
           child: Stack(
             children: [
@@ -55,6 +62,7 @@ class DashboardScreen extends StatelessWidget {
           case 'team': return const TeamScreen();
           case 'projects': return const ProjectsScreen();
           case 'payroll': return const PayrollScreen();
+          case 'attendance': return const AttendanceScreen();
           // case 'achievements': return const AchievementsScreen();
           case 'settings': return const SettingsScreen();
           case 'profile': return const ProfileScreen();
@@ -100,7 +108,7 @@ class DashboardScreen extends StatelessWidget {
       final navCubit = context.read<NavigationCubit>();
       final dashCubit = context.read<DashboardCubit>();
       return Container(
-        decoration:  BoxDecoration(border: Border(top: BorderSide(color: AppColors.gray))),
+        decoration:  BoxDecoration(border: Border(top: BorderSide(color: AppColors.gray100(context)))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [

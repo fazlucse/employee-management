@@ -19,4 +19,5 @@ class AppIcons {
   static const dollarSign = LucideIcons.dollarSign;
   static const award = LucideIcons.award;
   static const settings = LucideIcons.settings;
+    static const moreVertical = LucideIcons.moreVertical;
 }
