@@ -10,7 +10,7 @@ class AttendanceData extends Equatable {
   final Duration workTimeToday;
   final bool isClockedIn;
   final DateTime? lastClockTime;
-  final List<AttendanceLogEntry> log; // ← NOT required, has default
+  final List<AttendanceLogEntry> log;
 
   const AttendanceData({
     this.arrivedToday,
@@ -20,10 +20,9 @@ class AttendanceData extends Equatable {
     this.workTimeToday = Duration.zero,
     this.isClockedIn = false,
     this.lastClockTime,
-    this.log = const [], // ← DEFAULT EMPTY LIST (CRITICAL!)
+    this.log = const [],
   });
 
-  // GETTERS
   String get arrivedTodayText => arrivedToday != null
       ? _formatTime(arrivedToday!)
       : '--:--';
@@ -33,7 +32,6 @@ class AttendanceData extends Equatable {
 
   String get lateEarlyText => '$lateCount Late / $earlyCount Early';
 
-  // COPY WITH
   AttendanceData copyWith({
     DateTime? arrivedToday,
     int? lateCount,

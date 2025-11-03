@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 
-import '../../../data/models/attendance_data.dart';
 import '../../../data/models/attendance_log_entry.dart';
 import '../../cubits/attendance/attendance_cubit.dart';
 import 'widgets/back_app_bar.dart';
@@ -15,40 +14,9 @@ class AttendanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AttendanceCubit(attendanceStream: _mockRealTimeStream()),
+      create: (_) => AttendanceCubit(), // No stream needed
       child: const _AttendanceListView(),
     );
-  }
-
-  Stream<AttendanceData> _mockRealTimeStream() async* {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    while (true) {
-      yield AttendanceData(
-        log: [
-          AttendanceLogEntry(
-            date: today,
-            inTime: today.add(const Duration(hours: 10, minutes: 1)),
-            outTime: today.add(const Duration(hours: 18, minutes: 30)),
-            name: 'John Doe',
-            designation: 'Software Engineer',
-            inLocation: 'Head Office',
-            outLocation: 'Head Office',
-          ),
-          AttendanceLogEntry(
-            date: today.subtract(const Duration(days: 1)),
-            inTime: today.subtract(const Duration(days: 1)).add(const Duration(hours: 9, minutes: 45)),
-            outTime: today.subtract(const Duration(days: 1)).add(const Duration(hours: 18, minutes: 15)),
-            name: 'John Doe',
-            designation: 'Software Engineer',
-            inLocation: 'Remote',
-            outLocation: 'Remote',
-          ),
-        ],
-      );
-      await Future.delayed(const Duration(seconds: 30));
-    }
   }
 }
 
@@ -99,12 +67,14 @@ class _AttendanceListView extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => const AttendanceFormDialog(),
+      builder: (dialogContext) => BlocProvider.value(
+        value: context.read<AttendanceCubit>(),
+        child: const AttendanceFormDialog(),
+      ),
     );
   }
 }
 
-// Reusable Log Card
 class _AttendanceLogCard extends StatelessWidget {
   final AttendanceLogEntry entry;
   const _AttendanceLogCard({required this.entry});
@@ -127,7 +97,7 @@ class _AttendanceLogCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(dateFmt.format(entry.date), style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(dateFmt.format(entry.attendanceDate), style: const TextStyle(fontWeight: FontWeight.bold)),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -165,6 +135,13 @@ class _AttendanceLogCard extends StatelessWidget {
                 ],
               ],
             ),
+            if (entry.inRemarks != null || entry.outRemarks != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                'Note: ${entry.inRemarks ?? entry.outRemarks}',
+                style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic, color: Colors.grey),
+              ),
+            ],
           ],
         ),
       ),
