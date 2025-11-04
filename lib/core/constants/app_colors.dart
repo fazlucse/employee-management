@@ -65,4 +65,9 @@ class AppColors {
 
   static Color gray700(BuildContext context) =>
       Theme.of(context).brightness == Brightness.dark ? darkGray700 : lightGray700;
+      static Color text(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark ? Colors.white : AppColors.lightGray700;
+
+static Color textSecondary(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.dark ? Colors.white70 : AppColors.lightGray500;
 }

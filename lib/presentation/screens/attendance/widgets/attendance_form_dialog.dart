@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../data/models/office.dart';
 import '../../../cubits/attendance/attendance_cubit.dart';
 
@@ -16,20 +18,23 @@ class AttendanceFormDialog extends StatelessWidget {
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(8.w),
             child: Material(
               elevation: 24,
-              borderRadius: BorderRadius.circular(28),
+              borderRadius: BorderRadius.circular(15.r),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(15.r),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
                   child: Container(
-                    constraints: const BoxConstraints(maxWidth: 400),
+                    constraints: BoxConstraints(maxWidth: 450.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.96),
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(color: Colors.white60, width: 1),
+                      color: AppColors.surface(context).withOpacity(0.96),
+                      borderRadius: BorderRadius.circular(15.r),
+                      border: Border.all(
+                        color: AppColors.gray200(context).withOpacity(0.6),
+                        width: 1,
+                      ),
                     ),
                     child: const _DialogContent(),
                   ),
@@ -54,99 +59,41 @@ class _DialogContent extends StatelessWidget {
           slivers: [
             BlocBuilder<AttendanceCubit, AttendanceState>(
               builder: (context, state) {
-                final isIn =
-                    (state is AttendanceLoaded) && state.data.isClockedIn;
-                return SliverAppBar(
-  pinned: true,
-  floating: true,
-  snap: true,
-  expandedHeight: 120,
-  collapsedHeight: 70,  // ← Explicit collapsed height (title + padding)
-  backgroundColor: Colors.white,
-  elevation: 1,
-  automaticallyImplyLeading: false,
-  flexibleSpace: LayoutBuilder(
-    builder: (context, constraints) {
-      final isCollapsed = constraints.maxHeight <= 80;  // Detect collapsed state
-      return FlexibleSpaceBar(
-        collapseMode: CollapseMode.pin,
-        titlePadding: EdgeInsets.fromLTRB(24, 0, 80, isCollapsed ? 12 : 16),
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isIn ? LucideIcons.logOut : LucideIcons.logIn,
-                  size: 18,
-                  color: isIn ? Colors.red.shade600 : Colors.green.shade600,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'Add Attendance',
-                  style: TextStyle(
-                    fontSize: isCollapsed ? 20 : 22,  // ← Smaller font when collapsed
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey.shade900,
-                  ),
-                ),
-              ],
-            ),
-            AnimatedOpacity(  // ← Fade out subtitle smoothly
-              duration: const Duration(milliseconds: 150),
-              opacity: isCollapsed ? 0.0 : 1.0,
-              child: Text(
-                'Clock in/out precisely',
-                style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-              ),
-            ),
-          ],
-        ),
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.grey.shade50, Colors.white]),
-            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 4))],
-          ),
-        ),
-      );
-    },
-  ),
-);
+                final isIn = (state is AttendanceLoaded) && state.data.isClockedIn;
+                return SliverPersistentHeader(
+                  pinned: true,
+                  delegate: _FixedHeaderDelegate(height: 70.h, isClockedIn: isIn),
+                );
               },
             ),
+
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+                padding: EdgeInsets.fromLTRB(24.w, 16.h, 24.w, 32.h),
                 child: Column(
                   children: [
                     BlocBuilder<AttendanceCubit, AttendanceState>(
                       builder: (context, state) {
-                        if (state is! AttendanceLoaded)
-                          return const CircularProgressIndicator();
+                        if (state is! AttendanceLoaded) {
+                          return CircularProgressIndicator(color: AppColors.primary(context));
+                        }
                         final isIn = state.data.isClockedIn;
                         return AnimatedContainer(
                           duration: const Duration(milliseconds: 400),
-                          padding: const EdgeInsets.all(20),
+                          padding: EdgeInsets.all(20.w),
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
                               colors: isIn
-                                  ? [Colors.red.shade50, Colors.red.shade100]
-                                  : [
-                                      Colors.green.shade50,
-                                      Colors.green.shade100,
-                                    ],
+                                  ? [AppColors.danger.withOpacity(0.1), AppColors.danger.withOpacity(0.05)]
+                                  : [AppColors.success.withOpacity(0.1), AppColors.success.withOpacity(0.05)],
                             ),
-                            borderRadius: BorderRadius.circular(24),
+                            borderRadius: BorderRadius.circular(24.r),
                             border: Border.all(
-                              color: isIn
-                                  ? Colors.red.shade200
-                                  : Colors.green.shade200,
+                              color: isIn ? AppColors.danger.withOpacity(0.3) : AppColors.success.withOpacity(0.3),
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: (isIn ? Colors.red : Colors.green)
-                                    .withOpacity(0.2),
+                                color: (isIn ? AppColors.danger : AppColors.success).withOpacity(0.1),
                                 blurRadius: 16,
                               ),
                             ],
@@ -155,20 +102,20 @@ class _DialogContent extends StatelessWidget {
                         );
                       },
                     ),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 24.h),
                     _Section('Location Type', const _LocationTypeGrid()),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     _Section('Selection', const _LocationInput()),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     _Section('Notes', const _RemarksInput()),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     const _GPSPanel(),
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32.h),
                     Row(
-                      children: const [
-                        Expanded(child: _CancelButton()),
-                        SizedBox(width: 16),
-                        Expanded(child: _ClockButton()),
+                      children: [
+                        const Expanded(child: _CancelButton()),
+                        SizedBox(width: 16.w),
+                        const Expanded(child: _ClockButton()),
                       ],
                     ),
                   ],
@@ -177,19 +124,20 @@ class _DialogContent extends StatelessWidget {
             ),
           ],
         ),
+
         Positioned(
-          top: 16,
-          right: 16,
+          top: 10.h,
+          right: 16.w,
           child: GestureDetector(
             onTap: () => Navigator.pop(context),
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: AppColors.gray100(context),
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(blurRadius: 8)],
+                boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 8)],
               ),
-              child: Icon(LucideIcons.x, size: 24, color: Colors.grey.shade700),
+              child: Icon(LucideIcons.x, size: 24.sp, color: AppColors.textSecondary(context)),
             ),
           ),
         ),
@@ -198,32 +146,102 @@ class _DialogContent extends StatelessWidget {
   }
 }
 
+// ──────────────────────── FIXED HEADER DELEGATE ────────────────────────
+class _FixedHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final double height;
+  final bool isClockedIn;
+  const _FixedHeaderDelegate({required this.height, required this.isClockedIn});
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: [AppColors.gray100(context), AppColors.surface(context)]),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      padding: EdgeInsets.fromLTRB(24.w, 12.h, 80.w, 16.h),
+      child: Text(
+        'Add Attendance',
+        style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: AppColors.text(context)),
+      ),
+    );
+  }
+
+  @override double get maxExtent => height;
+  @override double get minExtent => height;
+  @override bool shouldRebuild(covariant _FixedHeaderDelegate old) => old.isClockedIn != isClockedIn;
+}
+
+// ──────────────────────── CANCEL & CLOCK BUTTONS (DEFINED EARLY) ────────────────────────
+class _CancelButton extends StatelessWidget {
+  const _CancelButton();
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => Navigator.pop(context),
+      child: Text('Cancel', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w500, color: AppColors.textSecondary(context))),
+    );
+  }
+}
+
+class _ClockButton extends StatelessWidget {
+  const _ClockButton();
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AttendanceCubit, AttendanceState>(
+      builder: (context, state) {
+        if (state is! AttendanceLoaded) return const SizedBox.shrink();
+        final isIn = state.data.isClockedIn;
+        final buttonColor = isIn ? AppColors.danger : AppColors.success;
+        return ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: buttonColor,
+            padding: EdgeInsets.symmetric(vertical: 16.h),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+            elevation: 8,
+            shadowColor: buttonColor.withOpacity(0.3),
+          ),
+          onPressed: () {
+            context.read<AttendanceCubit>().clockInOut();
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(isIn ? 'Clocked Out [Checkmark]' : 'Clocked In [Checkmark]', style: const TextStyle(color: Colors.white)),
+                backgroundColor: buttonColor,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+              ),
+            );
+          },
+          child: Text(isIn ? 'Clock Out' : 'Clock In',
+              style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.bold, color: Colors.white)),
+        );
+      },
+    );
+  }
+}
+
+// ──────────────────────── REUSABLE SECTION ────────────────────────
 class _Section extends StatelessWidget {
   final String title;
   final Widget child;
   const _Section(this.title, this.child);
   @override
   Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Text(
-        title,
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: Colors.grey.shade800,
-        ),
-      ),
-      const SizedBox(height: 8),
-      child,
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: AppColors.text(context))),
+          SizedBox(height: 8.h),
+          child,
+        ],
+      );
 }
 
+// ──────────────────────── LIVE CLOCK ────────────────────────
 class LiveClock extends StatefulWidget {
   const LiveClock({super.key});
-  @override
-  State<LiveClock> createState() => _LiveClockState();
+  @override State<LiveClock> createState() => _LiveClockState();
 }
 
 class _LiveClockState extends State<LiveClock> {
@@ -239,16 +257,17 @@ class _LiveClockState extends State<LiveClock> {
 
   void _update() {
     final now = DateTime.now();
-    final hour = now.hour > 12
-        ? now.hour - 12
-        : (now.hour == 0 ? 12 : now.hour);
-    final formatted =
-        '${hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}';
+    final hour = now.hour > 12 ? now.hour - 12 : (now.hour == 0 ? 12 : now.hour);
+    final minutes = now.minute.toString().padLeft(2, '0');
+    final formatted = '$hour:$minutes';
     final ampm = now.hour >= 12 ? 'PM' : 'AM';
-    final date =
-        '${['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][now.weekday - 1]} ${now.day.toString().padLeft(2, '0')} ${['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.month - 1]} ${now.year}';
-    if (_time != formatted || _ampm != ampm || _date != date)
-      setState(() => {_time = formatted, _ampm = ampm, _date = date});
+    final dayName = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][now.weekday - 1];
+    final monthName = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now.month - 1];
+    final formattedDate = '$dayName ${now.day.toString().padLeft(2, '0')} $monthName ${now.year}';
+
+    if (_time != formatted || _ampm != ampm || _date != formattedDate) {
+      setState(() => {_time = formatted, _ampm = ampm, _date = formattedDate});
+    }
   }
 
   @override
@@ -260,65 +279,38 @@ class _LiveClockState extends State<LiveClock> {
   @override
   Widget build(BuildContext context) {
     final isIn = context.select<AttendanceCubit, bool>(
-      (c) =>
-          c.state is AttendanceLoaded &&
-          (c.state as AttendanceLoaded).data.isClockedIn,
+      (c) => c.state is AttendanceLoaded && (c.state as AttendanceLoaded).data.isClockedIn,
     );
-    return Column(
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              LucideIcons.clock,
-              size: 32,
-              color: isIn ? Colors.red.shade600 : Colors.green.shade600,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              // ← Added Expanded to prevent overflow in tight spaces
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _time,
-                    style: TextStyle(
+        Icon(LucideIcons.clock, size: 36.sp, color: isIn ? AppColors.danger : AppColors.success),
+        SizedBox(width: 14.w),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('$_time $_ampm',
+                  style: TextStyle(
                       fontFamily: 'RobotoMono',
-                      fontSize: 40,
-                      color: Colors.grey.shade900,
-                    ),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        _ampm,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: isIn
-                              ? Colors.red.shade600
-                              : Colors.green.shade600,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        _date,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
+                      fontSize: 40.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.text(context),
+                      height: 1.0)),
+              SizedBox(height: 2.h),
+              Text(_date,
+                  style: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary(context), height: 1.0)),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
+// ──────────────────────── LOCATION TYPE GRID ────────────────────────
 class _LocationTypeGrid extends StatelessWidget {
   const _LocationTypeGrid();
   @override
@@ -329,21 +321,15 @@ class _LocationTypeGrid extends StatelessWidget {
         final selected = cubit.locationType;
         return LayoutBuilder(
           builder: (context, constraints) {
-            final w = (constraints.maxWidth - 12) / 2;
+            final w = (constraints.maxWidth - 12.w) / 2;
             return Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: 12.w,
+              runSpacing: 12.h,
               children: ['Home', 'Office', 'Factory', 'Other']
-                  .map(
-                    (l) => SizedBox(
+                  .map((l) => SizedBox(
                       width: w,
                       child: _LocationButton(
-                        label: l,
-                        isSelected: selected == l,
-                        onTap: () => cubit.setLocationType(l),
-                      ),
-                    ),
-                  )
+                          label: l, isSelected: selected == l, onTap: () => cubit.setLocationType(l))))
                   .toList(),
             );
           },
@@ -357,103 +343,82 @@ class _LocationButton extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
-  const _LocationButton({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
+  const _LocationButton({required this.label, required this.isSelected, required this.onTap});
+
   @override
   Widget build(BuildContext context) => GestureDetector(
-    onTap: onTap,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      height: 56, // ← Reduced height from 64 to 56
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(
-        color: isSelected ? const Color(0xFF6C5CE7) : Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isSelected ? const Color(0xFF6C5CE7) : Colors.grey.shade300,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          height: 56.h,
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary(context) : AppColors.gray100(context),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+                color: isSelected ? AppColors.primary(context) : AppColors.gray300(context)),
+            boxShadow: [
+              BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: isSelected ? 12 : 6)
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Radio<String>(
+                  value: label,
+                  groupValue: isSelected ? label : null,
+                  onChanged: (_) => onTap(),
+                  activeColor: Colors.white),
+              SizedBox(width: 8.w),
+              Text(label,
+                  style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected ? Colors.white : AppColors.text(context))),
+            ],
+          ),
         ),
-        boxShadow: [
-          BoxShadow(color: Colors.black12, blurRadius: isSelected ? 12 : 6),
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Radio<String>(
-            value: label,
-            groupValue: isSelected ? label : null,
-            onChanged: (_) => onTap(),
-            activeColor: Colors.white,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: isSelected ? Colors.white : Colors.grey.shade800,
-            ),
-          ),
-        ],
-      ),
-    ),
-  );
+      );
 }
 
+// ──────────────────────── REMARKS INPUT ────────────────────────
 class _RemarksInput extends StatelessWidget {
   const _RemarksInput();
   @override
-  Widget build(BuildContext context) =>
-      BlocSelector<AttendanceCubit, AttendanceState, String>(
+  Widget build(BuildContext context) => BlocSelector<AttendanceCubit, AttendanceState, String>(
         selector: (s) => s is AttendanceLoaded ? s.remarks : '',
         builder: (context, remarks) {
           final cubit = context.read<AttendanceCubit>();
           return TextField(
             controller: TextEditingController(text: remarks)
-              ..selection = TextSelection.fromPosition(
-                TextPosition(offset: remarks.length),
-              ),
+              ..selection = TextSelection.fromPosition(TextPosition(offset: remarks.length)),
             onChanged: cubit.setRemarks,
             maxLines: 3,
-            style: const TextStyle(fontSize: 14),
+            style: TextStyle(fontSize: 14.sp, color: AppColors.text(context)),
             decoration: InputDecoration(
               hintText: 'Optional notes',
+              hintStyle: TextStyle(fontSize: 14.sp, color: AppColors.textSecondary(context)),
               filled: true,
-              fillColor: Colors.grey.shade50,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide.none,
-              ),
+              fillColor: AppColors.gray100(context),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r), borderSide: BorderSide.none),
               enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: Colors.grey.shade300),
-              ),
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: BorderSide(color: AppColors.gray300(context))),
               focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(
-                  color: Color(0xFF6C5CE7),
-                  width: 2,
-                ),
-              ),
-              contentPadding: const EdgeInsets.all(16),
+                  borderRadius: BorderRadius.circular(16.r),
+                  borderSide: BorderSide(color: AppColors.primary(context), width: 2)),
+              contentPadding: EdgeInsets.all(16.w),
             ),
           );
         },
       );
 }
 
+// ──────────────────────── LOCATION INPUT ────────────────────────
 class _LocationInput extends StatelessWidget {
   const _LocationInput();
   @override
-  Widget build(BuildContext context) =>
-      BlocSelector<
-        AttendanceCubit,
-        AttendanceState,
-        (String, List<Office>, Office?)
-      >(
+  Widget build(BuildContext context) => BlocSelector<AttendanceCubit, AttendanceState, (String, List<Office>, Office?)>(
         selector: (s) {
           if (s is! AttendanceLoaded) return ('Home', [], null);
           final c = context.read<AttendanceCubit>();
@@ -465,36 +430,32 @@ class _LocationInput extends StatelessWidget {
           if (type == 'Office' || type == 'Factory') {
             return DropdownButtonFormField<Office>(
               value: selected,
+              dropdownColor: AppColors.surface(context),
+              style: TextStyle(color: AppColors.text(context)),
               decoration: InputDecoration(
                 filled: true,
-                fillColor: Colors.grey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 12,
-                ),
+                fillColor: AppColors.gray100(context),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r)),
+                contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               ),
               items: offices
-                  .map((o) => DropdownMenuItem(value: o, child: Text(o.name)))
+                  .map((o) => DropdownMenuItem(
+                      value: o, child: Text(o.name, style: TextStyle(color: AppColors.text(context)))))
                   .toList(),
               onChanged: cubit.selectOffice,
             );
           } else if (type == 'Other') {
             return TextField(
               controller: TextEditingController(text: cubit.customLocation)
-                ..selection = TextSelection.fromPosition(
-                  TextPosition(offset: cubit.customLocation.length),
-                ),
+                ..selection = TextSelection.fromPosition(TextPosition(offset: cubit.customLocation.length)),
               onChanged: cubit.setCustomLocation,
+              style: TextStyle(color: AppColors.text(context)),
               decoration: InputDecoration(
                 hintText: 'Custom location',
+                hintStyle: TextStyle(color: AppColors.textSecondary(context)),
                 filled: true,
-                fillColor: Colors.grey.shade50,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                fillColor: AppColors.gray100(context),
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(16.r)),
               ),
             );
           }
@@ -503,130 +464,61 @@ class _LocationInput extends StatelessWidget {
       );
 }
 
+// ──────────────────────── GPS PANEL ────────────────────────
 class _GPSPanel extends StatelessWidget {
   const _GPSPanel();
   @override
-  Widget build(
-    BuildContext context,
-  ) => BlocBuilder<AttendanceCubit, AttendanceState>(
-    builder: (context, state) {
-      final gps = state is AttendanceLoaded ? state.gpsLocation : 'Loading...';
-      final denied = gps.contains('denied');
-      final watching = state is AttendanceLoaded && state.isWatchingLocation;
-      return Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.grey.shade50,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.grey.shade200),
-          boxShadow: [BoxShadow(blurRadius: 8)],
-        ),
-        child: Row(
-          children: [
-            Icon(
-              LucideIcons.mapPin,
-              size: 28,
-              color: watching ? Colors.green : Colors.blue,
+  Widget build(BuildContext context) => BlocBuilder<AttendanceCubit, AttendanceState>(
+        builder: (context, state) {
+          final gps = state is AttendanceLoaded ? state.gpsLocation : 'Loading...';
+          final denied = gps.contains('denied');
+          final watching = state is AttendanceLoaded && state.isWatchingLocation;
+          return Container(
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: AppColors.gray100(context),
+              borderRadius: BorderRadius.circular(20.r),
+              border: Border.all(color: AppColors.gray200(context)),
+              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 8)],
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('GPS', style: TextStyle(fontWeight: FontWeight.bold)),
-                  Text(
-                    gps,
-                    style: TextStyle(
-                      fontSize: 13,
-                      color: denied ? Colors.red : Colors.black87,
-                    ),
-                  ),
-                  if (watching)
-                    Text(
-                      'Live',
-                      style: TextStyle(fontSize: 11, color: Colors.green),
-                    ),
-                ],
-              ),
-            ),
-            Column(
+            child: Row(
               children: [
-                FloatingActionButton.small(
-                  heroTag: 'track',
-                  backgroundColor: watching ? Colors.green : Colors.blue,
-                  onPressed: () => watching
-                      ? context.read<AttendanceCubit>().stopLiveTracking()
-                      : context.read<AttendanceCubit>().startLiveTracking(),
-                  child: Icon(
-                    watching ? Icons.location_on : Icons.location_searching,
-                    size: 18,
+                Icon(LucideIcons.mapPin, size: 28.sp, color: watching ? AppColors.success : AppColors.blue),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('GPS',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: AppColors.text(context))),
+                      Text(gps,
+                          style: TextStyle(
+                              fontSize: 13.sp,
+                              color: denied ? AppColors.danger : AppColors.textSecondary(context))),
+                      if (watching) Text('Live', style: TextStyle(fontSize: 11.sp, color: AppColors.success)),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                FloatingActionButton.small(
-                  heroTag: 'refresh',
-                  backgroundColor: Colors.grey,
-                  onPressed: () =>
-                      context.read<AttendanceCubit>().fetchLocationOnce(),
-                  child: const Icon(Icons.refresh, size: 18),
+                Column(
+                  children: [
+                    FloatingActionButton.small(
+                      heroTag: 'track',
+                      backgroundColor: watching ? AppColors.success : AppColors.blue,
+                      onPressed: () => watching
+                          ? context.read<AttendanceCubit>().stopLiveTracking()
+                          : context.read<AttendanceCubit>().startLiveTracking(),
+                      child: Icon(watching ? Icons.location_on : Icons.location_searching, size: 18.sp, color: Colors.white),
+                    ),
+                    SizedBox(height: 8.h),
+                    FloatingActionButton.small(
+                      heroTag: 'refresh',
+                      backgroundColor: AppColors.gray400(context),
+                      onPressed: () => context.read<AttendanceCubit>().fetchLocationOnce(),
+                      child: Icon(Icons.refresh, size: 18.sp, color: Colors.white),
+                    ),
+                  ],
                 ),
               ],
-            ),
-          ],
-        ),
-      );
-    },
-  );
-}
-
-class _CancelButton extends StatelessWidget {
-  const _CancelButton();
-  @override
-  Widget build(BuildContext context) => TextButton(
-    onPressed: () => Navigator.pop(context),
-    child: Text(
-      'Cancel',
-      style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
-    ),
-  );
-}
-
-class _ClockButton extends StatelessWidget {
-  const _ClockButton();
-  @override
-  Widget build(BuildContext context) =>
-      BlocBuilder<AttendanceCubit, AttendanceState>(
-        builder: (context, state) {
-          if (state is! AttendanceLoaded) return const SizedBox.shrink();
-          final isIn = state.data.isClockedIn;
-          return ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isIn
-                  ? Colors.red.shade500
-                  : Colors.green.shade500,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 8,
-            ),
-            onPressed: () {
-              context.read<AttendanceCubit>().clockInOut();
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(isIn ? 'Clocked Out ✓' : 'Clocked In ✓'),
-                  backgroundColor: isIn ? Colors.red : Colors.green,
-                ),
-              );
-            },
-            child: Text(
-              isIn ? 'Clock Out' : 'Clock In',
-              style: const TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
             ),
           );
         },

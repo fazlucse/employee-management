@@ -2,6 +2,8 @@
 import 'package:employee_management/injections/di.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
 import 'presentation/cubits/theme/theme_cubit.dart';
 import 'presentation/cubits/navigation/navigation_cubit.dart';
 import 'presentation/screens/dashboard/dashboard_screen.dart';
@@ -20,16 +22,23 @@ class DashboardApp extends StatelessWidget {
             data: _getCurrentTheme(themeState.mode),
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            child: MaterialApp(
-              debugShowCheckedModeBanner: false,
-              title: 'Company Dashboard',
-              theme: _lightTheme(),
-              darkTheme: _darkTheme(),
-              themeMode: _getThemeMode(themeState.mode),
-              home: BlocProvider(
-                create: (_) => NavigationCubit(),
-                child: const DashboardScreen(),
-              ),
+            child: ScreenUtilInit(
+              designSize: const Size(390, 844), // base size (for example: iPhone 12)
+              minTextAdapt: true,
+              splitScreenMode: true,
+              builder: (context, child) {
+                return MaterialApp(
+                  debugShowCheckedModeBanner: false,
+                  title: 'Company Dashboard',
+                  theme: _lightTheme(),
+                  darkTheme: _darkTheme(),
+                  themeMode: _getThemeMode(themeState.mode),
+                  home: BlocProvider(
+                    create: (_) => NavigationCubit(),
+                    child: const DashboardScreen(),
+                  ),
+                );
+              },
             ),
           );
         },
